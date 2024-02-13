@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <title>Reset Password</title>
+    <style>
+        body {
+            /* background-color: powderblue; */
+            background-color: #0f0f1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* body {
+            background-image: url('./background.png');
+            height: 100vh;
+            position: relative;
+        } */
+
+        .container {
+
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .reset-body {
+            padding: 4%;
+            color: #fff;
+            background: #182432;
+            box-shadow: 0px 6px 15px rgba(55, 205, 251, 0.5);
+            border-radius: 1rem;
+
+        }
+
+        .reset-heading{
+            color: #0d6efd;
+        }
+
+        .logo img{
+            width: 51%;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="container mt-5 ">
+            <div class="row mx-1 justify-content-center align-items-center">
+                <div class="reset-body col-md-6">
+                    <div class="logo d-flex justify-content-center">
+                        <img src="http://localhost:3008/images/logo.png" alt="">
+                    </div>
+                    <h2 class="reset-heading text-center"><b>RESET PASSWORD</b></h2>
+
+                    <form class="mt-5" id="myForm" action="" method="POST">
+
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" id="password" class="form-control" name="password" value="">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" id="password2" class="form-control" name="confirmpass" value="">
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" id="submit" class="btn
+                                btn-primary">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
