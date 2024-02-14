@@ -8,10 +8,7 @@ const SubscriptionUserModel = new mongoose.Schema({
         required:true,
         trim:true
     },
-    Lastname:{
-        type:String,
-        trim:true
-    },
+   
     roles: {
         type: [String],
         enum: ["user", "admin"],
@@ -29,8 +26,7 @@ const SubscriptionUserModel = new mongoose.Schema({
     },
     Password :{
         type:String,
-        required:true,
-        min:4
+       
     },
     is_verify: {
         type: Boolean,
@@ -41,8 +37,11 @@ const SubscriptionUserModel = new mongoose.Schema({
         type: String,
     },
     character:{
-        type:"String",
+        type:[String],
         enum : ["character1","character2","character3","character4","character5"]
+    },
+    document:{
+        type:String,
     },
     tokens : [
         {

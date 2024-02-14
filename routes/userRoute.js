@@ -1,11 +1,11 @@
 const express = require("express");
-const subscriptionUserRoute = express();
-const subscriptionUserController = require("../controllers/subscriptionuserController");
+const UserRoute = express();
+const UserController = require("../controllers/userController");
 const multer = require("multer");
 const path = require("path")
-subscriptionUserRoute.use(express.json());
-subscriptionUserRoute.use(express.urlencoded({extended:true}));
-subscriptionUserRoute.use(express.static("./public"))
+UserRoute.use(express.json());
+UserRoute.use(express.urlencoded({extended:true}));
+UserRoute.use(express.static("./public"))
 
 const auth = require("../middleware/auth");
 
@@ -67,31 +67,29 @@ const {signUpValidation} = require("../helpers/validation");
 // subscriptionUserRoute.set("views","./views/hbs");
 
 
-subscriptionUserRoute.set("view engine",'ejs');
-subscriptionUserRoute.set("views","./views/ejs");
+UserRoute.set("view engine",'ejs');
+UserRoute.set("views","./views/ejs");
 
-subscriptionUserRoute.post("/registeruser",subscriptionUserController.registereduser);
-subscriptionUserRoute.get("/users",subscriptionUserController.getalluser);
-subscriptionUserRoute.get("/verify",subscriptionUserController.verifymail);
-subscriptionUserRoute.post("/loginuser",subscriptionUserController.loginuser);
-subscriptionUserRoute.post("/forgetpassword",subscriptionUserController.forgetpassword);
+UserRoute.post("/registeruser",UserController.registereduser);
+// subscriptionUserRoute.get("/users",subscriptionUserController.getalluser);
+// subscriptionUserRoute.get("/verify",subscriptionUserController.verifymail);
+// subscriptionUserRoute.post("/loginuser",subscriptionUserController.loginuser);
+// subscriptionUserRoute.post("/forgetpassword",subscriptionUserController.forgetpassword);
 
-subscriptionUserRoute.get("/emailpage/:id",subscriptionUserController.emailpage);
-subscriptionUserRoute.post("/emailpage/:id",subscriptionUserController.resetpassword);
-
-
-subscriptionUserRoute.post("/refreshtoken",subscriptionUserController.refreshToken);
-subscriptionUserRoute.post("/postproject",auth,subscriptionUserController.projectregistered);
-subscriptionUserRoute.get("/getprojectlist",auth,subscriptionUserController.getprojectlist);
-subscriptionUserRoute.post("/uploadmedia",auth,upload.single('document'),subscriptionUserController.uploadmediadata);
-subscriptionUserRoute.get("/getmediadata",auth , subscriptionUserController.getuploadmediadata);
-subscriptionUserRoute.post("/savechat",subscriptionUserController.savechatdata);
-subscriptionUserRoute.get("/chatidmatch",subscriptionUserController.matchchatiddata);
-subscriptionUserRoute.get("/downloadPDF/:chatId",subscriptionUserController.downloadpdf);
-subscriptionUserRoute.post("/logout",auth,subscriptionUserController.logoutapi);
+// subscriptionUserRoute.get("/emailpage/:id",subscriptionUserController.emailpage);
+// subscriptionUserRoute.post("/emailpage/:id",subscriptionUserController.resetpassword);
 
 
+// subscriptionUserRoute.post("/refreshtoken",subscriptionUserController.refreshToken);
+// subscriptionUserRoute.post("/postproject",auth,subscriptionUserController.projectregistered);
+// subscriptionUserRoute.get("/getprojectlist",auth,subscriptionUserController.getprojectlist);
+// subscriptionUserRoute.post("/uploadmedia",auth,upload.single('document'),subscriptionUserController.uploadmediadata);
+// subscriptionUserRoute.get("/getmediadata",auth , subscriptionUserController.getuploadmediadata);
+UserRoute.post("/savechat",UserController.savechatdata);
+UserRoute.get("/chatidmatch",UserController.matchchatiddata);
+UserRoute.get("/downloadPDF",UserController.downloadpdf);
+// subscriptionUserRoute.post("/logout",auth,subscriptionUserController.logoutapi);
 
-module.exports = subscriptionUserRoute;
 
 
+module.exports = UserRoute;

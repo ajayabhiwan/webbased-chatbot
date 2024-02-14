@@ -1,5 +1,5 @@
 
-const users = require("../models/subscriptionuserModel");
+const users = require("../models/userModel");
 const keysecrect = "thisismysecrectcodehaveyouenjoy";
 const jwt = require('jsonwebtoken');
 const BlackList = require("../models/blacklistModel");

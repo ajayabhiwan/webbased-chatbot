@@ -3,12 +3,12 @@ const app = express();
 require("./db/conn");
 
 
-const subscriptionUserRoute = require("./routes/subscriptionuserRoute");
+const UserRoute = require("./routes/userRoute");
 
 const AdminRoute = require("./routes/AdminRoute");
 
 
-app.use("/",subscriptionUserRoute);
+app.use("/",UserRoute);
 app.use("/api",AdminRoute);
 
 

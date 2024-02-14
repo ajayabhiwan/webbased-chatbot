@@ -1,4 +1,4 @@
-const SubscriptionUser = require("../models/subscriptionuserModel");
+const UserModel = require("../models/userModel");
 const bcrypt = require('bcrypt');
 const randomstring = require("randomstring");
 const otpGenerator = require('otp-generator');
@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer")
 const keysecrect = "thisismysecrectcodehaveyouenjoy";
 const verifyRefreshToken = require("../utils/verifyRefreshToken");
 const jwt = require("jsonwebtoken");
-const subscriptionuserModel = require("../models/subscriptionuserModel");
+
 const verifyToken = require('../middleware/authas');
 const PROJECT = require("../models/projectModels");
 const UploadDocument = require("../models/uploadDocumentModel")
@@ -14,6 +14,9 @@ const BlackList = require("../models/blacklistModel");
 const ChatConversation = require("../models/chatconversationModel");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
+
+const mongoose = require('mongoose');
+
 // secured password ---- for paid user -----
 
 const securedpassword = async (password) => {
@@ -107,16 +110,16 @@ const sendResetPasswordEmail = async (Email, id, expirationTime) => {
 
 const registereduser = async (req, res) => {
     try {
-        const { Name, Lastname, Email, Password ,chatId } = req.body;
+        const { Name, Email, Password  } = req.body;
 
         console.log("req-body - value", req.body);
         const spassword = await securedpassword(Password);
 
-        if (!Name || !Email || !Password) {
+        if (!Name || !Email ) {
             return res.status(400).json({ success: false, message: "please fill up all details" })
         }
 
-        const preuser = await SubscriptionUser.findOne({ Email: Email });
+        const preuser = await UserModel.findOne({ Email: Email });
         console.log("insertuser value ---- already exist ---", preuser);
         if (preuser) {
 
@@ -124,19 +127,20 @@ const registereduser = async (req, res) => {
             return res.status(400).json({ success: false, message: "user with given Email id already exist" });
         } else {
 
-            const insertuser = new SubscriptionUser({
-                Name: Name, Lastname: Lastname, Email: Email, Password: spassword , chatId :chatId
+            const insertuser = new UserModel({
+                Name: Name, Email: Email, Password: spassword 
             });
+            // const insertuserToresponse = new SubscriptionUser({
+            //     Name: Name, Lastname: Lastname, Email: Email, Password: spassword 
+            // });
+            // console.log("insertuser data --- value -----", insertuser);
 
-            console.log("insertuser data --- value -----", insertuser);
-
-            const result = await insertuser.save();
-            sendVerifyMail(req.body.Email, result._id);
+            let result = await insertuser.save();
+            
+            // sendVerifyMail(req.body.Email, result._id);
             console.log("result ----- value ----", result);
 
             return res.status(200).json({ success: true, message: "data registered successfully", result })
-
-
         }
 
     } catch (error) {
@@ -150,7 +154,7 @@ const registereduser = async (req, res) => {
 ///verifymail ------
 const verifymail = async(req,res)=>{
     try {
-       const updateinfo = await SubscriptionUser.updateOne({_id: req.query.id},{$set:{is_verify:true}})
+       const updateinfo = await UserModel.updateOne({_id: req.query.id},{$set:{is_verify:true}})
        console.log(updateinfo);
        res.render("email-verified")
     } catch (error) {
@@ -167,7 +171,7 @@ const loginuser = async (req, res) => {
         const { Email, Password } = req.body;
         console.log("loginuser value -----", req.body);
 
-        const user = await SubscriptionUser.findOne({ Email: Email });
+        const user = await UserModel.findOne({ Email: Email });
         console.log("login user email ---", user)
 
         if (!user) {
@@ -180,7 +184,7 @@ const loginuser = async (req, res) => {
                 console.log("invalid emailid and password");
                 return res.status(400).json({ success: false, message: "invalid email and password" });
             } else {
-                if (user.is_verify === true) {
+                // if (user.is_verify === true) {
                     const token = await user.generateAuthtoken();
                     // const refreshToken = jwt.sign(
                     //     { _id: user._id, roles: user.roles },
@@ -197,9 +201,9 @@ const loginuser = async (req, res) => {
                         user: user
                     });
 
-                } else {
-                    return res.status(200).json({ success: true, message: "this email id is not varified" });
-                }
+                // } else {
+                //     return res.status(200).json({ success: true, message: "this email id is not varified" });
+                // }
             }
         }
 
@@ -217,7 +221,7 @@ const forgetpassword = async (req, res) => {
         const Email = req.body.Email
         console.log("forget password email id ----", Email);
 
-        const preuserdata = await SubscriptionUser.findOne({ Email: Email });
+        const preuserdata = await UserModel.findOne({ Email: Email });
         console.log("preuserdata ----- value -", preuserdata);
 
         if (preuserdata) {
@@ -232,7 +236,7 @@ const forgetpassword = async (req, res) => {
             const expirationTime = new Date(Date.now() + otpExpiration);
             console.log(" expirationTime--- value--", expirationTime);
 
-            const user = await SubscriptionUser.findOneAndUpdate({ Email: Email }, { $set: { reset_password_request: randomcode } }, { new: true })
+            const user = await UserModel.findOneAndUpdate({ Email: Email }, { $set: { reset_password_request: randomcode } }, { new: true })
             console.log("randomcode user subscription value ----", user);
             sendResetPasswordEmail(preuserdata.Email, randomcode, expirationTime);
             return res.status(200).json({ success: true, message: "Reset password mail sent !", user: user });
@@ -253,7 +257,7 @@ const emailpage = async (req, res) => {
     try {
         const reqdata = req.params.id
         console.log("reqdata of email page--", reqdata);
-        const user = await SubscriptionUser.findOne({ reset_password_request: reqdata });
+        const user = await UserModel.findOne({ reset_password_request: reqdata });
         console.log("find user of email page of reset password request- ", user);
 
         if (user) {
@@ -276,11 +280,11 @@ const resetpassword = async (req, res) => {
 
         console.log("forget password --- req .params value ----", id)
 
-        const data = await SubscriptionUser.findOne({ reset_password_request: id });
+        const data = await UserModel.findOne({ reset_password_request: id });
         console.log("resetpassword data value -----", data);
 
         if (data) {
-            const userfound = await SubscriptionUser.findOne({ _id: data._id });
+            const userfound = await UserModel.findOne({ _id: data._id });
             console.log("userfound of resetpassword ---", userfound);
             if (userfound) {
                 if (userfound.reset_password_request != '') {
@@ -291,7 +295,7 @@ const resetpassword = async (req, res) => {
                     console.log("reset-password hash ----", resetpasswordhash);
 
                     if (password === confirmpass) {
-                        const userdata = await SubscriptionUser.findOneAndUpdate({ _id: data._id }, { $set: { Password: resetpasswordhash, reset_password_request: "" } }, { new: true })
+                        const userdata = await UserModel.findOneAndUpdate({ _id: data._id }, { $set: { Password: resetpasswordhash, reset_password_request: "" } }, { new: true })
                         console.log("userdata reset value ---  ", userdata)
                         return res.status(200).send({ success: true, message: "User password has been changed !" })
                     } else {
@@ -465,15 +469,26 @@ const logoutapi = async(req,res)=>{
 
 const savechatdata = async(req,res)=>{
     try {
-        const { chatId  , message } = req.body;
+        const { chatId  , message,Email } = req.body;
         console.log("req.body value ---",req.body);
 
-        const prechatuser = await ChatConversation.findOne({chatId:chatId});
+        const useremail = await UserModel.findOne({Email:Email});
 
-        console.log("prechatuserdata -----",prechatuser);
+        console.log("useremail",useremail);
 
-        if(!prechatuser){
-            const chat = new ChatConversation({
+        if(!useremail){
+            return res.status(400).json({success:false,message:"user email id not exist"});
+
+        }
+
+         const prechatuser = await ChatConversation.findOne({chatId:chatId,user_id:useremail._id});
+         console.log("prechatuserdata -----",prechatuser);
+
+
+         
+         if(!prechatuser){
+             const chat = new ChatConversation({
+                user_id:useremail._id,
                 chatId: chatId,
                 message: message,
             });
@@ -485,17 +500,59 @@ const savechatdata = async(req,res)=>{
         }
 
         if(prechatuser){
-            prechatuser.message.push(message);
-            const result = await prechatuser.save();
+                const prevMessage = prechatuser.message;
+                const newMessage = message;
+                prechatuser.message = [...prevMessage,...newMessage];
+                const result = await prechatuser.save();
+        
+                return res.status(201).json({ success: true, message: "Chat saved successfully in old user." , result })
+            }
+
+
+////////////////////////////////////////////////
+
+        // const savechat = new ChatConversation({user_id:useremail._id,chatId:chatId ,message:message});
+
+        // console.log("save chat -details ---",savechat);
+
+        // const result = await savechat.save();
+
+        // console.log("savechat----result -----",result);
+
+        // return res.status(200).json({success:true , message:"save your chat successfully",result});
+
+
+
+        ////////////////////////////////
+
+        // const prechatuser = await ChatConversation.findOne({chatId:chatId});
+
+        // console.log("prechatuserdata -----",prechatuser);
+
+        // if(!prechatuser){
+        //     const chat = new ChatConversation({
+        //         chatId: chatId,
+        //         message: message,
+        //     });
+        //     console.log("chatdetails",chat);
     
-            return res.status(201).json({ success: true, message: "Chat saved successfully in old user." , result })
-        }
+        //     const result = await chat.save();
+    
+        //     return res.status(201).json({ success: true, message: "Chat saved successfully." , result })
+        // }
+
+        // if(prechatuser){
+        //     prechatuser.message.push(message);
+        //     const result = await prechatuser.save();
+    
+        //     return res.status(201).json({ success: true, message: "Chat saved successfully in old user." , result })
+        // }
 
         
         
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Internal Server Error." });
+        res.status(500).json({ success: false, message:  error.message});
     }
 }
 
@@ -505,33 +562,46 @@ const savechatdata = async(req,res)=>{
 const matchchatiddata = async(req,res)=>{
     try {
         const {chatId,Email} = req.body
-        console.log("chatId data ----value -----",chatId)
-        const chatiddata = await ChatConversation.findOne({chatId:chatId});
-        console.log("chatuserdata---value",chatiddata);
+        console.log("chatId data ----value -----",req.body)
 
-        const userchatiddata = await SubscriptionUser.findOne({Email:Email});
-        console.log("chatuserdata---value",userchatiddata);
+        const user = await UserModel.findOne({Email:Email})
+        console.log("chat--userdata---value",user);
 
-        if(chatiddata.chatId === userchatiddata.chatId){
-            return res.status(200).json({success:true , message:"chatiddata and userchatiddata match successfully",chatiddata});
-        }else{
-            return res.status(400).json({success:false , message:"chatiddata and userchatiddata not  match "});
+
+        if(!user){
+            return res.status(400).json({success:false , message:"user not found "});
         }
+
+        console.log("user ID -----",user._id);
+
+       
+
+        const chatiddata = await ChatConversation.findOne({user_id:user._id,chatId:chatId}).populate('user_id');;
+        console.log("chatiddata---value",chatiddata);
+
+        if(!chatiddata){
+            return res.status(400).json({success:false , message:"chat  not found "});
+        }
+
+        return res.status(200).json({success:true , message:"chat data found successfully",chatiddata});
+       
+
+       
 
     } catch (error) {
         console.log(error.message);
-        res.status(400).json({ success: false, message: "your are not authorize users" });
+        return  res.status(400).json({ success: false, message: error.message });
     }
 }
 
-
-
+       
+ 
 /////// create pdf ------- of chat conversation -----
 const createPDF = async (chatId) => {
     const pdfDoc = new PDFDocument();
-    const filePath = `./public/${chatId}_chatbot_conversation.pdf`; // Change the file path accordingly
+      const filePath = `./public/${chatId}_chatbot_conversation.pdf`; // Change the file path accordingly
 
-    pdfDoc.pipe(fs.createWriteStream(filePath));
+     pdfDoc.pipe(fs.createWriteStream(filePath));
 
     const chatMessages = await ChatConversation.find({ chatId: chatId });
 
@@ -550,7 +620,7 @@ const createPDF = async (chatId) => {
 
 const downloadpdf = async(req,res)=>{
     try {
-        const chatId = req.params.chatId;
+        const chatId = req.body.chatId;
         console.log("chatid --value --",chatId);
 
 
@@ -579,7 +649,7 @@ const downloadpdf = async(req,res)=>{
         // fs.createReadStream(filePath).pipe(res);
     } catch (error) {
         console.log(error.message);
-       return res.status(500).json({ success: false, message: "Internal Server Error." });
+       return res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -587,7 +657,7 @@ const downloadpdf = async(req,res)=>{
 
 const getalluser = async(req,res)=>{
     try {
-        const getuserdata = await subscriptionuserModel.find({});
+        const getuserdata = await UserModel.find({});
         console.log("getuserdata ---details",getuserdata);
 
         return res.status(200).json({success:true , message:"get all user-details ",getuserdata});
