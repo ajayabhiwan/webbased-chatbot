@@ -13,6 +13,6 @@ app.use("/api",AdminRoute);
 
 
 
-app.listen(5000,()=>{
-    console.log("server started at :http://127.0.0.1:5000");
+app.listen(3021,()=>{
+    console.log("server started at :http://127.0.0.1:3021");
 })
